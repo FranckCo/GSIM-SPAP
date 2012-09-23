@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="gsim-doc" default="read-xmi">
+
+	<description>Creation of GSIM documentation from the Enterprise Architect model</description>
+
+	<!-- Property file -->
+	<property file="ant.properties"/>
+
+	<!-- Runs the transformation that reads the raw XMI file -->
+	<target name="read-xmi">
+		<xslt in="${xmi.file}" out="${out.dir}/extracted.xml" style="${xslt.dir}/read-xmi.xsl" classpath="${xslt.engine}"/>
+		<echo message="Extracting information from ${xmi.file}"/>
+	</target>
+
+	<!-- Clean work directory -->
+	<target name="clean-work">
+		<delete quiet="true" dir="${work.dir}"/>
+		<mkdir  dir="${work.dir}"/>
+		<echo message="Cleaning work directory"/>
+	</target>
+
+</project>
