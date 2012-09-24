@@ -17,8 +17,9 @@
 
     <!-- Template for top level packages -->
     <xsl:template match="packagedElement[@xmi:type='uml:Package']">
+        <xsl:variable name="package-id" select="@xmi:id"/>
         <gsim:Package>
-            <xsl:attribute name="id" select="@xmi:id"/>
+            <xsl:attribute name="id" select="$package-id"/>
             <gsim:Name>
                 <xsl:value-of select="@name"/>
             </gsim:Name>
@@ -78,6 +79,7 @@
             </xsl:for-each>
 
             <!-- List the relations *starting* from the class : specializations, generalizations, aggregations, associations -->
+            <!-- This seems to be easier to do starting from the extension part of the model -->
             <xsl:for-each select="$class-ext[1]/links/Generalization/self::node()[@start=$class-id]">
                 <xsl:variable name="end-id" select="@end"/>
                 <xsl:variable name="other-end" select="/xmi:XMI/uml:Model/packagedElement/packagedElement[@xmi:id=$end-id]"/>
@@ -104,8 +106,8 @@
                     <!-- In case of aggregations, we only have one ownedEnd element -->
                     <xsl:for-each select="$association-node[1]/ownedEnd">
                         <xsl:variable name="end-name" select="@name"/>
-                        <xsl:variable name="end-class-id" select="type/@xmi:idref"/>
-                        <xsl:variable name="other-class-node" select="/xmi:XMI/uml:Model/packagedElement/packagedElement[@xmi:id=$end-class-id]"/>
+                        <xsl:variable name="other-class-id" select="type/@xmi:idref"/>
+                        <xsl:variable name="other-class-node" select="/xmi:XMI/uml:Model/packagedElement/packagedElement[@xmi:id=$other-class-id]"/>
                         <xsl:if test="@aggregation='composite'">
                             <gsim:Composition/>
                         </xsl:if>
@@ -138,9 +140,9 @@
                     <!-- In case of associations, we have two ownedEnd elements -->
                     <xsl:for-each select="$association-node[1]/ownedEnd">
                         <xsl:variable name="end-name" select="@name"/>
-                        <xsl:variable name="end-class-id" select="type/@xmi:idref"/>
+                        <xsl:variable name="other-class-id" select="type/@xmi:idref"/>
                         <xsl:choose>
-                            <xsl:when test="$end-class-id=$class-id">
+                            <xsl:when test="$other-class-id=$class-id">
                                 <gsim:ThisEnd>
                                     <xsl:if test="string-length($end-name) > 0">
                                         <gsim:Name>
@@ -154,7 +156,7 @@
                             </xsl:when>
                             <xsl:otherwise>
                                 <xsl:variable name="other-class-node"
-                                    select="/xmi:XMI/uml:Model/packagedElement/packagedElement[@xmi:id=$end-class-id]"/>
+                                    select="/xmi:XMI/uml:Model/packagedElement/packagedElement[@xmi:id=$other-class-id]"/>
                                 <gsim:OtherEnd>
                                     <gsim:ClassName>
                                         <xsl:value-of select="$other-class-node/@name"/>
